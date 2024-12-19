@@ -11,7 +11,9 @@ import {
   Platform,
 } from 'react-native';
 import BluetoothClassic from 'react-native-bluetooth-classic';
+import ScanningAnimation from './ScanningAnimation';
 
+import { connectToBackend } from './api/api';
 const BluetoothConnection = () => {
   const [devices, setDevices] = useState([]); // List of devices
   const [connectedDevice, setConnectedDevice] = useState(null); // Currently connected device
@@ -107,6 +109,7 @@ const BluetoothConnection = () => {
       const isConnected = await BluetoothClassic.connectToDevice(device.id);
       if (isConnected) {
         setConnectedDevice(device);
+        connectToBackend(device.id);
         Alert.alert('Device Connected', `Connected to ${device.name || 'Unnamed Device'}.`);
       } else {
         Alert.alert('Connection Failed', 'Unable to establish a connection.');
@@ -147,7 +150,7 @@ const BluetoothConnection = () => {
   const disconnectDevice = async () => {
     if (connectedDevice) {
       try {
-        await BluetoothClassic.disconnect();
+        await BluetoothClassic.disconnect(connectedDevice.id);
         setConnectedDevice(null);
         Alert.alert('Device Disconnected', 'Successfully disconnected from the device.');
       } catch (error) {
@@ -181,6 +184,7 @@ const BluetoothConnection = () => {
 
           {isScanning ? (
             <ActivityIndicator size="large" color="blue" />
+              // <ScanningAnimation />
           ) : noDevicesFound ? (
             <Text style={styles.noDeviceText}>No devices found. Try scanning again.</Text>
           ) : (
